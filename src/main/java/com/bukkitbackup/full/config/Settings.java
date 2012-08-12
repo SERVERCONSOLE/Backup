@@ -18,7 +18,6 @@ public final class Settings {
     private File configFile;
     private FileConfiguration settings;
     public boolean useMaxSizeBackup = false;
-    public boolean debugMessages;
 
     public Settings(File configFile, Strings strings) {
 

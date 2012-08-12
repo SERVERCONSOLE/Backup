@@ -146,6 +146,10 @@ pluginlist:
 # If false messages will only be logged to file.
 displaylog: true
 
+## Should we enable debugging in the console? (Defualt: false)
+# This will also create a debug.log file in the data directory.
+debugenabled: false
+
 ## Should we send messages in-game on backup complete. (Default: true)
 # False will only notify players with the "backup.notify" permission.
 notifyallplayers: true

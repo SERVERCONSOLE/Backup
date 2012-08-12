@@ -59,7 +59,7 @@ public class BackupFull extends JavaPlugin {
         settings.checkSettingsVersion(this.getDescription().getVersion());
 
         // Complete initalization of LogUtils.
-        LogUtils.finishInitLogUtils(settings.getBooleanProperty("displaylog", true));
+        LogUtils.finishInitLogUtils(settings.getBooleanProperty("displaylog", true), settings.getBooleanProperty("debugenabled", false));
 
         // Load Metric Utils.
         try {

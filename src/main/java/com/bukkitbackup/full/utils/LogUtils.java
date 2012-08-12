@@ -17,6 +17,7 @@ public class LogUtils {
     private static Logger logger;
     private static boolean logToConsole = true;
     private static String lastMesage;
+    public static boolean debugMode = false;
     
     /**
      * Setup the logger class with required settings.
@@ -34,10 +35,13 @@ public class LogUtils {
      * 
      * @param logToConsole Whether or not to output to the console.
      */
-    public static void finishInitLogUtils(boolean logToConsole) {
+    public static void finishInitLogUtils(boolean logToConsole, boolean debugMode) {
         
         // If we should send output to the console.
         LogUtils.logToConsole = logToConsole;
+        
+        // Is debugging enabled?
+        LogUtils.debugMode = debugMode;
     }
 
     /**
@@ -86,6 +90,16 @@ public class LogUtils {
         exceptionLog(ste);
     }
 
+     /**
+     * This is where debug messages should be sent.
+     * 
+     * @param message Debug message.
+     */
+    public static void sendDebug(String message) {
+        if(debugMode)
+            sendLog(message);
+    }
+    
     /**
      * This posts a tidy stack trace to the console.
      * 
