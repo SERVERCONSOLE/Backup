@@ -193,7 +193,7 @@ public final class Settings {
      */
     public int getBackupLimits() {
         String limitSetting = getStringProperty("maxbackups", "25").trim().toLowerCase();
-
+        
         // If it is null or set to disable.
         if (limitSetting.equals("-1") || limitSetting == null) {
             return 0;

@@ -220,7 +220,7 @@ public class BackupTask implements Runnable {
 
             // Get total backup limit.
             int backupLimit = settings.getBackupLimits();
-
+            if(backupLimit != 0) {
             // List all the files inside this folder.
             File[] filesList = FileUtils.listFilesInDir(folderToClean);
 
@@ -317,7 +317,7 @@ public class BackupTask implements Runnable {
                 }
 
             }
-
+            }
         } catch (SecurityException se) {
             LogUtils.exceptionLog(se, "Failed to clean old backups: Security Exception.");
         }
