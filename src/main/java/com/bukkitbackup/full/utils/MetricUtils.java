@@ -1,3 +1,6 @@
+/*
+ * Copyright 2011 Tyler Blair. All rights reserved.
+ */
 package com.bukkitbackup.full.utils;
 
 import java.io.*;
@@ -6,33 +9,65 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.UUID;
+import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 
-public class MetricUtils {
+public final class MetricUtils {
 
+    /**
+     * The current revision number
+     */
     private final static int REVISION = 5;
+    /**
+     * The base url of the metrics domain
+     */
     private static final String BASE_URL = "http://mcstats.org";
+    /**
+     * The url used to report a server's status
+     */
     private static final String REPORT_URL = "/report/%s";
+    /**
+     * Interval of time to ping (in minutes)
+     */
     private final static int PING_INTERVAL = 10;
+    /**
+     * The plugin this metrics submits for
+     */
     private final Plugin plugin;
+    /**
+     * The plugin configuration file
+     */
     private final YamlConfiguration configuration;
+    /**
+     * The plugin configuration file
+     */
     private final File configurationFile;
+    /**
+     * Unique server id
+     */
     public final String guid;
+    /**
+     * Lock for synchronization
+     */
     private final Object optOutLock = new Object();
+    /**
+     * Id of the scheduled task
+     */
     private volatile int taskId = -1;
 
-    public MetricUtils(Plugin plugin, File mainDataFolder) throws IOException {
+    public MetricUtils(Plugin plugin) throws IOException {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
         }
+
         this.plugin = plugin;
 
         // load the config
-        configurationFile = mainDataFolder;
+        configurationFile = getConfigFile();
         configuration = YamlConfiguration.loadConfiguration(configurationFile);
 
         // add some defaults
@@ -94,6 +129,7 @@ public class MetricUtils {
                         // Each post thereafter will be a ping
                         firstPost = false;
                     } catch (IOException e) {
+                        Bukkit.getLogger().log(Level.INFO, "[Metrics] " + e.getMessage());
                     }
                 }
             }, 0, PING_INTERVAL * 1200);
@@ -111,10 +147,12 @@ public class MetricUtils {
         synchronized (optOutLock) {
             try {
                 // Reload the metrics file
-                configuration.load(configurationFile);
+                configuration.load(getConfigFile());
             } catch (IOException ex) {
+                Bukkit.getLogger().log(Level.INFO, "[Metrics] " + ex.getMessage());
                 return true;
             } catch (InvalidConfigurationException ex) {
+                Bukkit.getLogger().log(Level.INFO, "[Metrics] " + ex.getMessage());
                 return true;
             }
             return configuration.getBoolean("opt-out", false);
@@ -164,6 +202,24 @@ public class MetricUtils {
                 taskId = -1;
             }
         }
+    }
+
+    /**
+     * Gets the File object of the config file that should be used to store data
+     * such as the GUID and opt-out status
+     *
+     * @return the File object for the config file
+     */
+    public File getConfigFile() {
+        // I believe the easiest way to get the base folder (e.g craftbukkit set via -P) for plugins to use
+        // is to abuse the plugin object we already have
+        // plugin.getDataFolder() => base/plugins/PluginA/
+        // pluginsFolder => base/plugins/
+        // The base is not necessarily relative to the startup directory.
+        File pluginsFolder = plugin.getDataFolder().getParentFile();
+
+        // return => base/plugins/PluginMetrics/config.yml
+        return new File(new File(pluginsFolder, "PluginMetrics"), "config.yml");
     }
 
     /**

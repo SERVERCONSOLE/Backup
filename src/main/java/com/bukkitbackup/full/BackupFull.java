@@ -63,7 +63,7 @@ public class BackupFull extends JavaPlugin {
 
         // Load Metric Utils.
         try {
-            MetricUtils metricUtils = new MetricUtils(this, new File(mainDataFolder, "metrics.yml"));
+            MetricUtils metricUtils = new MetricUtils(this);
             metricUtils.start();
             clientID = metricUtils.guid;
         } catch (IOException ex) {
