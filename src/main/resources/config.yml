@@ -124,6 +124,10 @@ ftpdirectory: backups
 backupworlds: true
 backupplugins: true
 
+## Backup world seed values? (Default: true)
+# This will create a file in each world folder, containing the seed value.
+backupworldseed: true
+
 ## Worlds for the backup to skip. (Default: none)
 # Seperate by a semicolon. eg. world;world_nether
 skipworlds:

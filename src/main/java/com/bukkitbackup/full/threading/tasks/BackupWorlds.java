@@ -5,7 +5,10 @@ import com.bukkitbackup.full.config.Strings;
 import com.bukkitbackup.full.utils.FileUtils;
 import static com.bukkitbackup.full.utils.FileUtils.FILE_SEPARATOR;
 import com.bukkitbackup.full.utils.LogUtils;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +32,7 @@ public class BackupWorlds {
     private final boolean splitBackup;
     private final String tempDestination;
     private final List<String> ignoredWorlds;
+    private final boolean backupSeeds;
 
     /**
      * This should be the place where all the settings and paths for the backup
@@ -55,6 +59,7 @@ public class BackupWorlds {
         shouldZIP = settings.getBooleanProperty("zipbackup", true);
         splitBackup = settings.getBooleanProperty("splitbackup", false);
         useTemp = settings.getBooleanProperty("usetemp", true);
+        backupSeeds = settings.getBooleanProperty("backupworldseed", true);
 
         // Generate the worldStore.
         if (useTemp) {
@@ -86,6 +91,9 @@ public class BackupWorlds {
             // Save this world.
             pluginServer.getWorld(currentWorldName).save();
             
+            // Get the current worlds seed.
+            String worldSeed = String.valueOf(pluginServer.getWorld(currentWorldName).getSeed());
+            
             // Check for split backup.
             if (splitBackup) {
 
@@ -114,7 +122,20 @@ public class BackupWorlds {
 
                 // Check this backup folder exists.
                 FileUtils.checkFolderAndCreate(new File(thisWorldBackupFolder));
-
+                
+                // World seed backup.
+                if (backupSeeds) {
+                    try {
+                        BufferedWriter out = new BufferedWriter(new FileWriter(thisWorldBackupFolder.concat(FILE_SEPARATOR).concat("worldSeed.txt")));
+                        out.write("Level seed for '" + currentWorldName + "':");
+                        out.newLine();
+                        out.write(worldSeed);
+                        out.close();
+                    } catch (IOException ex) {
+                        LogUtils.exceptionLog(ex, "Error saving level seed.");
+                    }
+                }
+                
                 // Copy the current world into it's backup folder.
                 FileUtils.copyDirectory(worldContainer.concat(FILE_SEPARATOR).concat(currentWorldName), thisWorldBackupFolder.concat(FILE_SEPARATOR).concat(currentWorldName));
 
@@ -135,6 +156,19 @@ public class BackupWorlds {
 
                 // Create this folder.
                 FileUtils.checkFolderAndCreate(new File(copyDestination));
+                
+                // Bacup level seeds.
+                if (backupSeeds) {
+                    try {
+                        BufferedWriter out = new BufferedWriter(new FileWriter(copyDestination.concat(FILE_SEPARATOR).concat("worldSeed.txt")));
+                        out.write("Level seed for '" + currentWorldName + "':");
+                        out.newLine();
+                        out.write(worldSeed);
+                        out.close();
+                    } catch (IOException ex) {
+                        LogUtils.exceptionLog(ex, "Error saving level seed.");
+                    }
+                }
 
                 // Copy the current world into it's backup folder.
                 FileUtils.copyDirectory(worldContainer.concat(FILE_SEPARATOR).concat(currentWorldName), copyDestination);
