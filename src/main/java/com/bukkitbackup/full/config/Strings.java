@@ -197,7 +197,7 @@ public class Strings {
 
         // Check we got passed a string.
         if (toColor != null) {
-            return toColor.replaceAll("&([0-9a-f])", "\u00A7$1");
+            return toColor.replaceAll("&([0-9a-fklmnor])", "\u00A7$1");
         } else {
             return "";
         }
