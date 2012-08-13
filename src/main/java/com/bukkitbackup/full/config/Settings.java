@@ -109,7 +109,8 @@ public final class Settings {
      * Gets the value of a integer property.
      *
      * @param property The name of the property.
-     * @return The value of the property, defaults to -1.
+     * @param defaultInt Set the default value of the integer.
+     * @return The value of the property.
      */
     public int getIntProperty(String property, int defaultInt) {
         return settings.getInt(property, defaultInt);
@@ -119,16 +120,18 @@ public final class Settings {
      * Gets the value of a boolean property.
      *
      * @param property The name of the property.
-     * @return The value of the property, defaults to true.
+     * @param defaultBool Set the default value of the boolean.
+     * @return The value of the property.
      */
     public boolean getBooleanProperty(String property, boolean defaultBool) {
         return settings.getBoolean(property, defaultBool);
     }
 
     /**
-     * Gets a value of the string property and make sure it is not null.
+     * Gets a value of the string property.
      *
      * @param property The name of the property.
+     * @param defaultString Set the default value of the string.
      * @return The value of the property.
      */
     public String getStringProperty(String property, String defaultString) {
@@ -136,12 +139,12 @@ public final class Settings {
     }
 
     /**
-     * Method that gets the amount of time between backups. - Checks string for
-     * no automatic backup. - Checks for if only number (as minutes). - Checks
-     * for properly formatted string. - If unknown amount of time, sets as
-     * minutes.
+     * Method to convert human readable time, to minutes. - Checks string for no
+     * automatic backup. - Checks for if only number (as minutes). - Checks for
+     * properly formatted string. - If unknown amount of time, sets as minutes.
      *
-     * @return Amount of time between backups. (In minutes)
+     * @param forSetting The configuration item o get the time for,
+     * @return The amount of time, in minutes.
      */
     public int getIntervalInMinutes(String forSetting) {
         String settingInterval = getStringProperty(forSetting, "15M").trim().toLowerCase();
@@ -182,17 +185,9 @@ public final class Settings {
         }
     }
 
-    /**
-     * Method that gets the amount of time between backups. - Checks string for
-     * no automatic backup. - Checks for if only number (as minutes). - Checks
-     * for properly formatted string. - If unknown amount of time, sets as
-     * minutes.
-     *
-     * @return Amount of time between backups. (In minutes)
-     */
     public int getBackupLimits() {
         String limitSetting = getStringProperty("maxbackups", "25").trim().toLowerCase();
-        
+
         // If it is null or set to disable.
         if (limitSetting.equals("-1") || limitSetting == null) {
             return 0;

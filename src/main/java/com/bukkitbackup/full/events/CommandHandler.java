@@ -319,11 +319,11 @@ public class CommandHandler implements Listener, CommandExecutor {
     }
 
     private void toggleEnabled(CommandSender sender) {
-        if (prepareBackup.backupEnabled) {
-            prepareBackup.backupEnabled = false;
+        if (PrepareBackup.backupEnabled) {
+            PrepareBackup.backupEnabled = false;
             messageSender(sender, strings.getString("backuptoggleoff"));
         } else {
-            prepareBackup.backupEnabled = true;
+            PrepareBackup.backupEnabled = true;
             messageSender(sender, strings.getString("backuptoggleon"));
         }
     }

@@ -166,7 +166,8 @@ public class Strings {
      * Gets a value of the string property, and replaces options.
      *
      * @param property The identifier for the string.
-     * @param option The variable to replace %%ARG%% with.
+     * @param optionOne The variable to replace %%ARG%% with.
+     * @param optionTwo The variable to replace %%ARG1%% with.
      * @return The string from properties, with colors encoded, and text
      * replaced.
      */

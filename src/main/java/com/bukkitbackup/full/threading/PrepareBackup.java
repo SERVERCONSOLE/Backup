@@ -12,9 +12,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 /**
- * This class determines if we should start a backup, and what settings to use for the backup.
- * Once it has determined to start a backup, it pushes one out to a new thread.
- * 
+ * This class determines if we should start a backup, and what settings to use
+ * for the backup. Once it has determined to start a backup, it pushes one out
+ * to a new thread.
+ *
  * @author Domenic Horner
  */
 public class PrepareBackup implements Runnable {
@@ -23,12 +24,11 @@ public class PrepareBackup implements Runnable {
     private final Server pluginServer;
     private final Settings settings;
     private final Strings strings;
-    
     public static boolean backupInProgress = false;
     public static boolean backupEnabled = true;
     public boolean isLastBackup = false;
     public boolean isManualBackup;
-    
+
     public PrepareBackup(Plugin plugin, Settings settings, Strings strings) {
         this.plugin = plugin;
         this.pluginServer = plugin.getServer();
@@ -119,16 +119,16 @@ public class PrepareBackup implements Runnable {
      * Prepared for, and starts, a doBackup.
      */
     protected void prepareBackup() {
-        
+
         // Tell the world!
         backupInProgress = true;
-        
+
         // Notify doBackup has started.
         notifyStarted();
 
         // Save all players to worlds.
         pluginServer.savePlayers();
-        
+
         // Turn off auto-saving of worlds.
         for (World world : pluginServer.getWorlds()) {
             world.setAutoSave(false);
