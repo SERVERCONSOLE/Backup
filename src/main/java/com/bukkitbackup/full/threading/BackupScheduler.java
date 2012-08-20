@@ -3,6 +3,8 @@ package com.bukkitbackup.full.threading;
 import com.bukkitbackup.full.config.Settings;
 import com.bukkitbackup.full.config.Strings;
 import com.bukkitbackup.full.utils.LogUtils;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 
@@ -30,6 +32,11 @@ public class BackupScheduler implements Runnable {
     }
 
     public void run() {
+            Calendar currentDate = Calendar.getInstance();
+    SimpleDateFormat formatter= new SimpleDateFormat("HH:mm");
+    String dateNow = formatter.format(currentDate.getTime());
+    
+        
 //                // Configure main backup task schedule.
 //        int backupInterval = settings.getBackupInterval();
 //        if (backupInterval != -1 && backupInterval != 0) {
