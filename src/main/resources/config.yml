@@ -8,6 +8,9 @@
 ## How often show the backup run? (Default: "15M" / 15 Minutes)
 # (Note: -1 or 0 will disable automatic backups.)
 # Format: [Time][M-Minutes, H-Hours, D-Days, W-Weeks]
+# For setting absolute times, use this instead.
+# 2AM, 6AM, 10AM, 2PM, 6PM, 10PM
+#backupinterval: TA[02:00,06:00,10:00,14:00,18:00,22:00]
 backupinterval: 15M
 
 ## Enable scheduled save-all? (Default: "0" / Off)

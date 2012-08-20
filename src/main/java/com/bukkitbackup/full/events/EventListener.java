@@ -59,12 +59,15 @@ public class EventListener implements Listener {
      * Called when a player leaves the server.
      *
      */
+    // @TODO determine how we should handle this if backups are at specific times.
+    // for now, i set it to 15 mins.
     private void playerPart(PlayerEvent event) {
         int onlinePlayers = plugin.getServer().getOnlinePlayers().length;
         // Check if it was the last player, and we need to stop backups after this last player leaves.
         if (onlinePlayers == 1 && !settings.getBooleanProperty("backupemptyserver", false)) {
             prepareBackup.isLastBackup = true;
-            int intervalInMinutes = settings.getIntervalInMinutes("backupinterval");
+            //int intervalInMinutes = settings.getBackupInterval();
+            int intervalInMinutes = 15;
             if (intervalInMinutes != 0) {
                 int interval = intervalInMinutes * 1200;
                 lastBackupID = plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, prepareBackup, interval);

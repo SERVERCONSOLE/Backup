@@ -138,16 +138,17 @@ public final class Settings {
         return settings.getString(property, defaultString);
     }
 
+
+    
     /**
      * Method to convert human readable time, to minutes. - Checks string for no
      * automatic backup. - Checks for if only number (as minutes). - Checks for
      * properly formatted string. - If unknown amount of time, sets as minutes.
      *
-     * @param forSetting The configuration item o get the time for,
      * @return The amount of time, in minutes.
      */
-    public int getIntervalInMinutes(String forSetting) {
-        String settingInterval = getStringProperty(forSetting, "15M").trim().toLowerCase();
+    public int getSaveAllInterval() {
+        String settingInterval = getStringProperty("saveallinterval", "15M").trim().toLowerCase();
         // If it is null or set to disable.
         if (settingInterval.equals("-1") || settingInterval == null) {
             return 0;

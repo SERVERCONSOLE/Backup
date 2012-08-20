@@ -5,6 +5,7 @@ import com.bukkitbackup.full.config.Strings;
 import com.bukkitbackup.full.config.UpdateChecker;
 import com.bukkitbackup.full.events.CommandHandler;
 import com.bukkitbackup.full.events.EventListener;
+import com.bukkitbackup.full.threading.BackupScheduler;
 import com.bukkitbackup.full.threading.BackupTask;
 import com.bukkitbackup.full.threading.PrepareBackup;
 import com.bukkitbackup.full.threading.tasks.BackupEverything;
@@ -15,6 +16,8 @@ import com.bukkitbackup.full.utils.LogUtils;
 import com.bukkitbackup.full.utils.MetricUtils;
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.plugin.PluginManager;
@@ -81,17 +84,21 @@ public class BackupFull extends JavaPlugin {
         // Check backup path.
         FileUtils.checkFolderAndCreate(new File(settings.getStringProperty("backuppath", "backups")));
 
+        //settings.isBackupTimed();
+
         // Setup backup tasks.
         backupEverything = new BackupEverything(settings);
         backupWorlds = new BackupWorlds(pluginServer, settings, strings);
         backupPlugins = new BackupPlugins(settings, strings);
         backupTask = new BackupTask(this, settings, strings);
 
+        // Initalize the update checker code.
+        updateChecker = new UpdateChecker(this.getDescription(), strings, clientID);
+
         // Create new "PrepareBackup" instance.
         prepareBackup = new PrepareBackup(this, settings, strings);
 
-        // Initalize the update checker code.
-        updateChecker = new UpdateChecker(this.getDescription(), strings, clientID);
+
 
         // Initalize Command Listener.
         getCommand("backup").setExecutor(new CommandHandler(prepareBackup, this, settings, strings, updateChecker));
@@ -101,26 +108,83 @@ public class BackupFull extends JavaPlugin {
         EventListener eventListener = new EventListener(prepareBackup, this, settings, strings);
         pluginManager.registerEvents(eventListener, this);
 
-        // Configure main backup task schedule.
-        int backupInterval = settings.getIntervalInMinutes("backupinterval");
-        if (backupInterval != -1 && backupInterval != 0) {
 
-            // Convert to server ticks.
-            int backupIntervalInTicks = (backupInterval * 1200);
+        // Check if the main backup should run at specific times.
+        String backupInterval = settings.getStringProperty("backupinterval", "15M").trim().toLowerCase();
+        int backupSchedule = 0;
+        String[] backupSchedArray = null;
+        
+        // If it is just a number, return minutes.
+        if (backupInterval.matches("^[0-9]+$")) {
+            backupSchedule = Integer.parseInt(backupInterval);
 
-            // Should the schedule repeat?
-            if (settings.getBooleanProperty("norepeat", false)) {
-                pluginServer.getScheduler().scheduleAsyncDelayedTask(this, prepareBackup, backupIntervalInTicks);
-                LogUtils.sendLog(strings.getString("norepeatenabled", Integer.toString(backupInterval)));
+            // If it is like 4D or 2H.
+        } else if (backupInterval.matches("[0-9]+[a-z]")) {
+            Pattern timePattern = Pattern.compile("^([0-9]+)[a-z]$");
+            Matcher amountTime = timePattern.matcher(backupInterval);
+            Pattern letterPattern = Pattern.compile("^[0-9]+([a-z])$");
+            Matcher letterTime = letterPattern.matcher(backupInterval);
+            if (letterTime.matches() && amountTime.matches()) {
+                String letter = letterTime.group(1);
+                int time = Integer.parseInt(amountTime.group(1));
+                if (letter.equals("m")) {
+                    backupSchedule = time;
+                } else if (letter.equals("h")) {
+                    backupSchedule = time * 60;
+                } else if (letter.equals("d")) {
+                    backupSchedule = time * 1440;
+                } else if (letter.equals("w")) {
+                    backupSchedule = time * 10080;
+                } else {
+                    LogUtils.sendLog(strings.getString("unknowntimeident"));
+                    backupSchedule = time;
+                }
             } else {
-                pluginServer.getScheduler().scheduleAsyncRepeatingTask(this, prepareBackup, backupIntervalInTicks, backupIntervalInTicks);
+                LogUtils.sendLog(strings.getString("checkbackupinterval"));
+                backupSchedule = 0;
             }
+        } else if (backupInterval.matches("^ta\\[(.*)\\]$")) {
+            Pattern letterPattern = Pattern.compile("^ta\\[(.*)\\]$");
+            Matcher array = letterPattern.matcher(backupInterval);
+            
+            backupSchedArray = array.toString().split(",");
+            
+            
+            LogUtils.sendDebug("Using Times.");
+            
+        } else {
+            LogUtils.sendLog(strings.getString("checkbackupinterval"));
+            backupSchedule = 0;
+        }
+
+        // Make sure it is enabled.
+        if (!backupInterval.equals("-1") || !backupInterval.equals("0") || backupInterval != null) {
+
+            if (backupSchedArray != null) {
+                BackupScheduler backupScheduler = new BackupScheduler(this, prepareBackup, settings, strings, backupSchedArray);
+                pluginServer.getScheduler().scheduleAsyncDelayedTask(this, backupScheduler);
+            } else {
+
+                // Convert to server ticks.
+                int backupIntervalInTicks = (backupSchedule * 1200);
+
+                // Should the schedule repeat?
+                if (settings.getBooleanProperty("norepeat", false)) {
+                    pluginServer.getScheduler().scheduleAsyncDelayedTask(this, prepareBackup, backupIntervalInTicks);
+                    LogUtils.sendLog(strings.getString("norepeatenabled", Integer.toString(backupSchedule)));
+                } else {
+                    pluginServer.getScheduler().scheduleAsyncRepeatingTask(this, prepareBackup, backupIntervalInTicks, backupIntervalInTicks);
+                }
+
+            }
+
         } else {
             LogUtils.sendLog(strings.getString("disbaledauto"));
         }
 
+
         // Configure save-all schedule.
-        int saveAllInterval = settings.getIntervalInMinutes("saveallinterval");
+        int saveAllInterval = settings.getSaveAllInterval();
         if (saveAllInterval != 0 && saveAllInterval != -1) {
 
             // Convert to server ticks.
@@ -165,4 +229,5 @@ public class BackupFull extends JavaPlugin {
         // Shutdown complete.
         LogUtils.sendLog(this.getDescription().getFullName() + " has completely un-loaded!");
     }
+
 }
