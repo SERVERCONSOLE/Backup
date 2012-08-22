@@ -113,7 +113,7 @@ public class BackupFull extends JavaPlugin {
         String backupInterval = settings.getStringProperty("backupinterval", "15M").trim().toLowerCase();
         int backupSchedule = 0;
         String[] backupSchedArray = null;
-        
+
         // If it is just a number, return minutes.
         if (backupInterval.matches("^[0-9]+$")) {
             backupSchedule = Integer.parseInt(backupInterval);
@@ -146,12 +146,12 @@ public class BackupFull extends JavaPlugin {
         } else if (backupInterval.matches("^ta\\[(.*)\\]$")) {
             Pattern letterPattern = Pattern.compile("^ta\\[(.*)\\]$");
             Matcher array = letterPattern.matcher(backupInterval);
-            
+
             backupSchedArray = array.toString().split(",");
-            
-            
+
+
             LogUtils.sendDebug("Using Times.");
-            
+
         } else {
             LogUtils.sendLog(strings.getString("checkbackupinterval"));
             backupSchedule = 0;
@@ -160,24 +160,23 @@ public class BackupFull extends JavaPlugin {
         // Make sure it is enabled.
         if (!backupInterval.equals("-1") || !backupInterval.equals("0") || backupInterval != null) {
 
-            if (backupSchedArray != null) {
-                BackupScheduler backupScheduler = new BackupScheduler(this, prepareBackup, settings, strings, backupSchedArray);
-                pluginServer.getScheduler().scheduleAsyncDelayedTask(this, backupScheduler);
+
+            // Convert to server ticks.
+            int backupIntervalInTicks = (backupSchedule * 1200);
+
+            // Should the schedule repeat?
+            if (settings.getBooleanProperty("norepeat", false)) {
+                pluginServer.getScheduler().scheduleAsyncDelayedTask(this, prepareBackup, backupIntervalInTicks);
+                LogUtils.sendLog(strings.getString("norepeatenabled", Integer.toString(backupSchedule)));
             } else {
-
-                // Convert to server ticks.
-                int backupIntervalInTicks = (backupSchedule * 1200);
-
-                // Should the schedule repeat?
-                if (settings.getBooleanProperty("norepeat", false)) {
-                    pluginServer.getScheduler().scheduleAsyncDelayedTask(this, prepareBackup, backupIntervalInTicks);
-                    LogUtils.sendLog(strings.getString("norepeatenabled", Integer.toString(backupSchedule)));
-                } else {
-                    pluginServer.getScheduler().scheduleAsyncRepeatingTask(this, prepareBackup, backupIntervalInTicks, backupIntervalInTicks);
-                }
-
+                pluginServer.getScheduler().scheduleAsyncRepeatingTask(this, prepareBackup, backupIntervalInTicks, backupIntervalInTicks);
             }
 
+
+
+        } else if (backupSchedArray != null) {
+            BackupScheduler backupScheduler = new BackupScheduler(this, prepareBackup, settings, strings, backupSchedArray);
+            pluginServer.getScheduler().scheduleAsyncDelayedTask(this, backupScheduler);
         } else {
             LogUtils.sendLog(strings.getString("disbaledauto"));
         }
@@ -229,5 +228,4 @@ public class BackupFull extends JavaPlugin {
         // Shutdown complete.
         LogUtils.sendLog(this.getDescription().getFullName() + " has completely un-loaded!");
     }
-
 }
