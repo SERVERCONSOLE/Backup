@@ -111,15 +111,19 @@ public class BackupFull extends JavaPlugin {
 
         // Check if the main backup should run at specific times.
         String backupInterval = settings.getStringProperty("backupinterval", "15M").trim().toLowerCase();
-        int backupSchedule = 0;
+        int backupMinutes = 0;
         String[] backupSchedArray = null;
 
-        // If it is just a number, return minutes.
+        // Use regex to match the backup interval string.
         if (backupInterval.matches("^[0-9]+$")) {
-            backupSchedule = Integer.parseInt(backupInterval);
 
-            // If it is like 4D or 2H.
+            // Parse it for minutes.
+            backupMinutes = Integer.parseInt(backupInterval);
+            LogUtils.sendDebug("Entry is set to minutes. (M:0002)");
+
         } else if (backupInterval.matches("[0-9]+[a-z]")) {
+
+            // Parse it for larger time periods.
             Pattern timePattern = Pattern.compile("^([0-9]+)[a-z]$");
             Matcher amountTime = timePattern.matcher(backupInterval);
             Pattern letterPattern = Pattern.compile("^[0-9]+([a-z])$");
@@ -128,59 +132,64 @@ public class BackupFull extends JavaPlugin {
                 String letter = letterTime.group(1);
                 int time = Integer.parseInt(amountTime.group(1));
                 if (letter.equals("m")) {
-                    backupSchedule = time;
+                    backupMinutes = time;
                 } else if (letter.equals("h")) {
-                    backupSchedule = time * 60;
+                    backupMinutes = time * 60;
                 } else if (letter.equals("d")) {
-                    backupSchedule = time * 1440;
+                    backupMinutes = time * 1440;
                 } else if (letter.equals("w")) {
-                    backupSchedule = time * 10080;
+                    backupMinutes = time * 10080;
                 } else {
                     LogUtils.sendLog(strings.getString("unknowntimeident"));
-                    backupSchedule = time;
+                    backupMinutes = time;
                 }
             } else {
                 LogUtils.sendLog(strings.getString("checkbackupinterval"));
-                backupSchedule = 0;
             }
+            LogUtils.sendDebug("Found correctly-formatted time (M:0001)");
+
         } else if (backupInterval.matches("^ta\\[(.*)\\]$")) {
+
+            // Found time-array string.
             Pattern letterPattern = Pattern.compile("^ta\\[(.*)\\]$");
             Matcher array = letterPattern.matcher(backupInterval);
-
             backupSchedArray = array.toString().split(",");
-
-
-            LogUtils.sendDebug("Using Times.");
+            LogUtils.sendDebug("Found time array string. (M:0003)");
 
         } else {
+
+            // Nothing found.
             LogUtils.sendLog(strings.getString("checkbackupinterval"));
-            backupSchedule = 0;
+            backupMinutes = 0;
+            LogUtils.sendDebug("No correct backup interval string found. (M:0004)");
+
         }
 
-        // Make sure it is enabled.
-        if (!backupInterval.equals("-1") || !backupInterval.equals("0") || backupInterval != null) {
+        if (backupMinutes != -1 && backupMinutes != 0) {
 
+            LogUtils.sendDebug("Doing recurring backup interval code. (M:0005)");
 
             // Convert to server ticks.
-            int backupIntervalInTicks = (backupSchedule * 1200);
+            int backupIntervalInTicks = (backupMinutes * 1200);
 
             // Should the schedule repeat?
             if (settings.getBooleanProperty("norepeat", false)) {
                 pluginServer.getScheduler().scheduleAsyncDelayedTask(this, prepareBackup, backupIntervalInTicks);
-                LogUtils.sendLog(strings.getString("norepeatenabled", Integer.toString(backupSchedule)));
+                LogUtils.sendLog(strings.getString("norepeatenabled", Integer.toString(backupMinutes)));
             } else {
                 pluginServer.getScheduler().scheduleAsyncRepeatingTask(this, prepareBackup, backupIntervalInTicks, backupIntervalInTicks);
             }
-
-
-
         } else if (backupSchedArray != null) {
+
+            LogUtils.sendDebug("Doing time array backup code. (M:0006)");
             BackupScheduler backupScheduler = new BackupScheduler(this, prepareBackup, settings, strings, backupSchedArray);
             pluginServer.getScheduler().scheduleAsyncDelayedTask(this, backupScheduler);
+
         } else {
+
+            LogUtils.sendDebug("Disabled automatic backup. (M:0007)");
             LogUtils.sendLog(strings.getString("disbaledauto"));
         }
-
 
         // Configure save-all schedule.
         int saveAllInterval = settings.getSaveAllInterval();
