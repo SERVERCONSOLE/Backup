@@ -37,13 +37,13 @@ public class BackupScheduler implements Runnable {
         // Loop to check if we need to backup.
         while(true) {
             
-            LogUtils.sendLog("Checking if we should backup.");
+            LogUtils.sendDebug("Checking if we should backup. (M:0008)");
             
             // Get current time, and format it to our requirements.
             Calendar calendarInstance = Calendar.getInstance();
             String timeNow = new SimpleDateFormat("HH:mm").format(calendarInstance.getTime());
             
-            LogUtils.sendLog("Time is: "+ timeNow);
+            LogUtils.sendDebug("Time is: "+ timeNow + " (M:0009)");
             
             // Loop the array of times we want to backup at.
             for (int j = 0; j < timesArray.length; j++) {
