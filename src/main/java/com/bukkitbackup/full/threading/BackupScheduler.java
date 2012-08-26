@@ -5,8 +5,6 @@ import com.bukkitbackup.full.config.Strings;
 import com.bukkitbackup.full.utils.LogUtils;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 
