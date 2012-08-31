@@ -94,13 +94,13 @@ public class BackupWorlds {
             while(notSaved) {
                 try {
                     pluginServer.getWorld(currentWorldName).save();
-                    
                 } catch(ConcurrentModificationException cme) {
                     LogUtils.sendLog("Encountered Exception Performing Save-All, Re-trying.");
                 } finally {
                     notSaved = false;
                 }
             }
+            
             // Get the current worlds seed.
             String worldSeed = String.valueOf(pluginServer.getWorld(currentWorldName).getSeed());
             
