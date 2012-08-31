@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.LinkedList;
 import java.util.List;
 import org.bukkit.Server;
@@ -89,8 +90,17 @@ public class BackupWorlds {
             String currentWorldName = worldsToBackup.removeFirst();
             
             // Save this world.
-            pluginServer.getWorld(currentWorldName).save();
-            
+            boolean notSaved = true;
+            while(notSaved) {
+                try {
+                    pluginServer.getWorld(currentWorldName).save();
+                    
+                } catch(ConcurrentModificationException cme) {
+                    LogUtils.sendLog("Encountered Exception Performing Save-All, Re-trying.");
+                } finally {
+                    notSaved = false;
+                }
+            }
             // Get the current worlds seed.
             String worldSeed = String.valueOf(pluginServer.getWorld(currentWorldName).getSeed());
             

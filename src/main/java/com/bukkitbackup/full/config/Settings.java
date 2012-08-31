@@ -193,6 +193,7 @@ public final class Settings {
         if (limitSetting.equals("-1") || limitSetting == null) {
             return 0;
         }
+        
         // If it is just a number, return minutes.
         if (limitSetting.matches("^[0-9]+$")) {
             return Integer.parseInt(limitSetting);
