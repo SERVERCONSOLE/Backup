@@ -14,7 +14,7 @@
     </repositories>
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/gamerx/Backup/issues</url>
+        <url>https://github.com/serverconsole/Backup/issues</url>
     </issueManagement>
     <build>
         <finalName>Backup</finalName>
